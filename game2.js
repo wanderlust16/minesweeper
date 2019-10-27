@@ -1,12 +1,9 @@
-// === label: 지뢰 개수 ===  //
-
-
 // === reset button === // 
 function reset(){
     while(map.hasChildNodes()) {
         map.removeChild(map.firstChild);
     } 
-    gameStart(); // timer가 겹침
+    gameStart();
 }
 
 // === map logic === // 
@@ -19,12 +16,14 @@ document.getElementById("play").addEventListener('click', gameStart);
     const col = parseInt(document.getElementById("col").value);
     const mineNum = parseInt(document.getElementById("mine").value);
     const time = document.getElementById("timer");
+    
     time.innerText = 0;
     function countTime() {
         time.innerText++;
     }
     setInterval(countTime, 1000);
-    let isOver = true; // true이면 모두 openCell;
+    
+    let isOver = false; 
     if (row < 5 || row > 30 || col < 5 || col > 30) {
         alert("칸 개수를 올바르게 설정해 주세요!")
     } else if (mineNum < 0 || mineNum > row * col) {
@@ -32,19 +31,19 @@ document.getElementById("play").addEventListener('click', gameStart);
     } else {
 
     let minesLeft = document.getElementById("minesLeft")
-    minesLeft.textContent = mineNum;
+    minesLeft.innerHTML = mineNum;
 
     const cells = [];
     
-    for (let i=0; i<col; i++){
+    for (let i=0; i<col; i++){ 
         cells[i] = new Array();
         const arr = document.createElement('div');
         map.appendChild(arr);
         arr.setAttribute('class', 'arr');
         for (let j=0; j<row; j++){
             const cell = document.createElement('div');
-            cell.setAttribute('x', j) // 추가. 순서가 바뀜.
-            cell.setAttribute('y', i) // 추가
+            cell.setAttribute('x', j) 
+            cell.setAttribute('y', i)
             cells[i][j] = cell;            
             arr.appendChild(cell);
             cell.setAttribute('class', 'defaultCell');
@@ -54,10 +53,10 @@ document.getElementById("play").addEventListener('click', gameStart);
     }
     placeMine();
 
-    // === 지뢰심기(random) === // 
+    // === 지뢰심기 === // 
 
     function placeMine() {
-        for(let i=0; i<mineNum; i++) {
+        for(let i=0; i<mineNum; i++) { 
             const rdmX = Math.floor(Math.random() * col);
             const rdmY = Math.floor(Math.random() * row);
             const mineCell = cells[rdmX][rdmY];
@@ -70,21 +69,6 @@ document.getElementById("play").addEventListener('click', gameStart);
 
     // === Click === //
 
-    // function mineClick() {
-    //     for(let i=0; i<row; i++) {
-    //         for(let j=0; j<col; j++) {
-    //             const cell = cells[i][j];
-    //             if (cell.getAttribute('mineCell')=='true'){
-    //                 cell.className="mine";
-    //                 gameover();
-    //             } else if (cell.getAttribute('neighborCell')) {
-    //                 cell.className="neighbor"
-    //                 cell.openCell(); 
-    //             }
-    //         }
-    //     }
-    // }
-
     function handleClick(cell){
         if (cell.currentTarget.classList.contains("mineCell")) {
             gameOver(); 
@@ -95,67 +79,79 @@ document.getElementById("play").addEventListener('click', gameStart);
     }
 
     function getNeighborCells(cell) {  
-        const i = parseInt(cell.currentTarget.getAttribute("y")); 
-        const j = parseInt(cell.currentTarget.getAttribute("x"));
-        console.log(i, j);
+        const i = parseInt(cell.currentTarget.getAttribute("x"));
+        const j = parseInt(cell.currentTarget.getAttribute("y"));
         let neighborCells = [];
-        surroundCells = [
-            cells[i-1][j-1], // j에서 에러발생
-            cells[i][j-1],
-            cells[i+1][j-1], // j에서 에러발생
-            cells[i-1][j],
-            cells[i+1][j],
-            cells[i-1][j+1],
-            cells[i][j+1],
-            cells[i+1][j+1] 
+        if (j === 0) {
+            surroundCells = [
+                cells[j][i-1],
+                cells[j+1][i-1], 
+                cells[j+1][i],
+                cells[j][i+1],
+                cells[j+1][i+1] 
             ]
+        } else if (j === row - 1) {
+            surroundCells = [
+                cells[j-1][i-1],
+                cells[j][i-1],
+                cells[j-1][i],
+                cells[j-1][i+1],
+                cells[j][i+1],
+            ]
+        } else {
+        surroundCells = [
+            cells[j-1][i-1], 
+            cells[j][i-1],
+            cells[j+1][i-1], 
+            cells[j-1][i],
+            cells[j+1][i],
+            cells[j-1][i+1],
+            cells[j][i+1],
+            cells[j+1][i+1] 
+            ]
+        }
+         
         neighborCells = surroundCells.filter(surroundCell => surroundCell !== undefined)
         return neighborCells;
     }
     
     function openCell(cell) {
         const neighborCells = getNeighborCells(cell);
-        // const isMine = cell.currentTarget.classList.contains("mineCell");
-        // const isOpen = cell.currentTarget.classList.contains("isOpen");
-
-        // const mineCount = neighborCells.reduce((pv, cv) => {
-        //     if(cv === isMine) pv++;
-        //     return pv;
-        // }, 0);
+        cell.currentTarget.classList.remove("defaultCell");
+        cell.currentTarget.classList.add("isOpen");
         let mineCount = 0
         neighborCells.forEach(neighborCell => {
             if(neighborCell.classList.contains("mineCell")) {
                 mineCount++;
             }
         })
-
-        cell.currentTarget.classList.remove("defaultCell");
-        cell.currentTarget.classList.add("isOpen");
-
-        if(mineCount > 0) { // 작동 안함
+        // neighborCells.forEach(neighborCell => console.log(neighborCell));
+        if(mineCount > 0) {
             cell.currentTarget.textContent = mineCount;
-            console.log(mineCount);
         } else {
-            neighborCells.forEach(neighborCell => {   
+            neighborCells.forEach(neighborCell => {
+                neighborCell;// neighborCell을 초기화해야 openCell의 재귀함수를 call할 수 있을 것 같은데, 어떻게 초기화해야하는지 모르겠습니다.
                 if(!neighborCell.classList.contains("isOpen")) {
                     openCell(neighborCell);
                 }
             });
         };
+
+        if(document.getElementsByClassName("isOpen").length === row * col - mineNum){
+            gameWin();
+        }
     };
     
-
     // === 우클릭 === //
 
     function rightClick(e) {
-        if (e.currentTarget.className==="defaultCell") {  
+        if (e.currentTarget.className === "defaultCell") {  
             e.preventDefault();
             e.currentTarget.className="flagCell";
             minesLeft.innerHTML--;
-        } else if (e.currentTarget.className==="flagCell") { 
+        } else if (e.currentTarget.className === "flagCell") { 
             e.preventDefault();
             e.currentTarget.className="defaultCell";
-            // e.currentTarget.textContent="";
             minesLeft.innerHTML++;
         }
     } 
@@ -167,8 +163,11 @@ document.getElementById("play").addEventListener('click', gameStart);
         isOver = true;
         alert('gameover');
         time.textContent = null;
+        location.reload();
+    }
+
+    function gameWin() {
+        alert("You win!");
     }
     }
 }
-
-
