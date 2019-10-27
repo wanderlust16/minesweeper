@@ -3,14 +3,17 @@
 
 // === reset button === // 
 function reset(){
-    location.reload();
-    // time.textContent = "";
-    // 이전 row와 col 개수로 map 다시 생성
+    while(map.hasChildNodes()) {
+        map.removeChild(map.firstChild);
+    } 
+    gameStart(); // timer가 겹침
 }
 
 // === map logic === // 
 
-document.getElementById("play").addEventListener('click', function(){
+document.getElementById("play").addEventListener('click', gameStart);
+
+    function gameStart(){
     const map = document.getElementById("map")
     const row = parseInt(document.getElementById("row").value);
     const col = parseInt(document.getElementById("col").value);
@@ -22,7 +25,6 @@ document.getElementById("play").addEventListener('click', function(){
     }
     setInterval(countTime, 1000);
     let isOver = true; // true이면 모두 openCell;
-
     if (row < 5 || row > 30 || col < 5 || col > 30) {
         alert("칸 개수를 올바르게 설정해 주세요!")
     } else if (mineNum < 0 || mineNum > row * col) {
@@ -49,7 +51,7 @@ document.getElementById("play").addEventListener('click', function(){
             cell.addEventListener("click", handleClick);
             cell.addEventListener("contextmenu", rightClick);
         }
-    } 
+    }
     placeMine();
 
     // === 지뢰심기(random) === // 
@@ -83,19 +85,6 @@ document.getElementById("play").addEventListener('click', function(){
     //     }
     // }
 
-    // === 클릭 === // 
-
-    
-    // function handleClick(e) {
-    //     if (e.currentTarget.classList.contains("mineCell")) {
-    //         gameOver();
-    //         console.log(e.currentTarget[i][j]);
-    //         isOver = true;
-    //     } else {
-    //         openCell(cell); // 적합한 인자는?
-    //     }
-    // } 
-
     function handleClick(cell){
         if (cell.currentTarget.classList.contains("mineCell")) {
             gameOver(); 
@@ -104,8 +93,6 @@ document.getElementById("play").addEventListener('click', function(){
             openCell(cell);
         }; 
     }
-    
-    // ** 이상한 문제: 좌우 끝 줄은 클릭 시 주변 셀이 5개 정의되는데 (정상)), 위아래 끝줄은 클릭 시 j값을 찾을 수 없음 ** //
 
     function getNeighborCells(cell) {  
         const i = parseInt(cell.currentTarget.getAttribute("y")); 
@@ -128,13 +115,19 @@ document.getElementById("play").addEventListener('click', function(){
     
     function openCell(cell) {
         const neighborCells = getNeighborCells(cell);
-        console.log(neighborCells);
-        const isMine = cell.currentTarget.classList.contains("mineCell");
-        const isOpen = cell.currentTarget.classList.contains("isOpen");
-        const mineCount = neighborCells.reduce((pv, cv) => {
-            if(cv === isMine) pv++;
-            return pv;
-        }, 0);
+        // const isMine = cell.currentTarget.classList.contains("mineCell");
+        // const isOpen = cell.currentTarget.classList.contains("isOpen");
+
+        // const mineCount = neighborCells.reduce((pv, cv) => {
+        //     if(cv === isMine) pv++;
+        //     return pv;
+        // }, 0);
+        let mineCount = 0
+        neighborCells.forEach(neighborCell => {
+            if(neighborCell.classList.contains("mineCell")) {
+                mineCount++;
+            }
+        })
 
         cell.currentTarget.classList.remove("defaultCell");
         cell.currentTarget.classList.add("isOpen");
@@ -144,7 +137,7 @@ document.getElementById("play").addEventListener('click', function(){
             console.log(mineCount);
         } else {
             neighborCells.forEach(neighborCell => {   
-                if(neighborCell !== isOpen) {
+                if(!neighborCell.classList.contains("isOpen")) {
                     openCell(neighborCell);
                 }
             });
@@ -154,43 +147,28 @@ document.getElementById("play").addEventListener('click', function(){
 
     // === 우클릭 === //
 
-    // function rightClick(e) {
-    //     e.preventDefault();
-    //         if (e.currentTarget.className="defaultCell") {
-    //             e.currentTarget.className="flagCell";
-    //             e.currentTarget.textContent="!";
-    //             // minesLeft -= 1;
-    //         } else if (e.currentTarget.className="flagCell") {
-    //             e.currentTarget.className="defaultCell";
-    //             e.currentTarget.textContent="";
-    //             // minesLeft += 1;
-    //         }
-    // }
-
     function rightClick(e) {
-        if (e.currentTarget.className="defaultCell") {  
+        if (e.currentTarget.className==="defaultCell") {  
             e.preventDefault();
             e.currentTarget.className="flagCell";
-            minesLeft.textContent -= 1;
-        } else if (e.currentTarget.className="flagCell") { // 다시 안 돌아옴 ㅠㅠ
+            minesLeft.innerHTML--;
+        } else if (e.currentTarget.className==="flagCell") { 
             e.preventDefault();
             e.currentTarget.className="defaultCell";
             // e.currentTarget.textContent="";
-            minesLeft.textContent += 1;
+            minesLeft.innerHTML++;
         }
     } 
 
     // === 게임 종료 === // 
     
     function gameOver() {
-        // openCells();
+        // cells.classList.add("isOpen");
         isOver = true;
         alert('gameover');
         time.textContent = null;
-        
     }
-
     }
-})
+}
 
 
