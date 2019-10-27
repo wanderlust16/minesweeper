@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title> Minsweeper </title>
+        <link rel="stylesheet" type="text/css" href="game2.css">
+    </head> 
+    <body>
+        <header class="bar">
+            <div class="setting">
+                <input id="row" type="number" placeholder="가로" value="10">
+                <input id="col" type="number" placeholder="세로" value="10">
+                <input id="mine" type="number" placeholder="지뢰 개수" value="10">
+                <button id="play">게임 시작</button>
+            </div>
+            <div class="label">
+                <div id="minesLeft">minesLeft</div> 
+                <button type="button" class="buttonReset" onclick="reset()">reset</button>
+                <div id="timer" onload="timer()">Time: </div> 
+            <div>
+        </header>  
+        <div id="map">
+        </div>
+        <script type="text/javascript" src="./game2.js"></script>
+    </body>
+</html>
